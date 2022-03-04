@@ -1,0 +1,26 @@
+digraph site {
+	graph [splines=ortho]
+	node [shape=box]
+	node [image="./images/vEOS_img.png"]
+	edge [arrowhead=none]
+	"cph-swn0100" -> "cph-dds1-c004"
+	"cph-swn0100" -> "cph4-cs1"
+	"cph-swn0100" -> "cph2-cs2"
+	"cph-swn0100" -> "cph-swn0200-TestAs1"
+	"cph-swn0100" -> "cph2-edgertr01"
+	"cph-swn0100" -> "cph2-edgertr01"
+	"cph-swn0100" -> "cph2-edgertr01"
+	"cph-swn0100" -> "cph4-edgertr01"
+	"cph-swn0100" -> "cph4-edgertr01"
+	"cph-swn0100" -> "cph4-edgertr01"
+	"cph-swn0100" -> "cph-swn0102"
+	"cph-swn0100" -> "cph-swn0102"
+	"cph-swn0100" -> "cph-ron0137-sdw"
+	"cph-swn0100" -> "cph-ron0137-sdw"
+	"cph-swn0100" -> "cph-ron0137-sdw"
+	"cph-swn0100" -> "cph-ron0142-sdw"
+	"cph-swn0100" -> "cph-ron0142-sdw"
+	"cph-swn0100" -> "cph-ron0142-sdw"
+	"cph-swn0100" -> "cph-dds1-sa007"
+	"cph-swn0100" -> "cph-cs3-sa007"
+}

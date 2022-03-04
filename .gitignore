@@ -1,0 +1,6 @@
+.env
+nornir.log
+archive/
+inventory/
+__pycache__
+diagrams/
