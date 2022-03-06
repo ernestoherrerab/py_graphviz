@@ -11,20 +11,19 @@ def host_list(hosts):
         host_list.append(result_host)
     return host_list
 
-def gen_graph(name, source_list):
+def gen_graph(name, source_list, filename):
     """ 
     Generate Graph
     """
-    graph = Digraph(name)
-    graph.attr("node", shape="box")
-    graph.attr("node", image="./images/vEOS_img.png")
-    graph.attr("edge", arrowhead="none")
-    graph.format = "png"
-    graph.graph_attr["splines"] = "ortho"
+    dot = Digraph(name, format='png')
+    dot.attr("node", shape="box")
+    dot.attr("node", image="./images/vEOS_img.png")
+    dot.attr("edge", arrowhead="none")
+    dot.format = "png"
+    dot.graph_attr["splines"] = "ortho"
     # Generate Edge Relationships
     for edges in source_list:
         node1, node2 = edges
-        graph.edge(node1, node2)
-    rendered = Source(graph)
-    rendered.render(filename="site")
-    return rendered
+        dot.edge(node1, node2)
+    # RENDER DOT FILE INTO PNG
+    dot.render(filename=filename, format="png")

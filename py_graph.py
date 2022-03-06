@@ -57,10 +57,11 @@ def main():
     """
     print("Generating Diagrams...")
     # Generate Graph Edges LLDP Neighbors
-    #for cdp_tuple in cdp_tuples_list:
-    graph.gen_graph("site", cdp_tuples_list[0])
-    #graph.render_graph(site_graph, "fabric")
-    
+    for cdp_tuple in cdp_tuples_list:
+        root = cdp_tuple[0][0].split("-")
+        site_id = root[0]
+        graph.gen_graph(f"{site_id}_site", cdp_tuple, f"{site_id}_site")        
+  
             
 
 if __name__ == '__main__':
