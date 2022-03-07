@@ -19,10 +19,9 @@ def get_data_task(task):
 
 def main():
     ### PROGRAM VARIABLES ###
-    #username = input("Username: ")
-    #password = getpass(prompt="Password: ", stream=None)
-    username = "adminehb"
-    password = config("PASSWORD")
+    username = input("Username: ")
+    password = getpass(prompt="Password: ", stream=None)
+    diagrams_path = Path("diagrams/")
     cdp_tuples_list = []
 
     ### INITIALIZE NORNIR ###
@@ -60,7 +59,8 @@ def main():
     for cdp_tuple in cdp_tuples_list:
         root = cdp_tuple[0][0].split("-")
         site_id = root[0]
-        graph.gen_graph(f"{site_id}_site", cdp_tuple, f"{site_id}_site")        
+        site_path = diagrams_path / f"{site_id}_site"
+        graph.gen_graph(f"{site_id}_site", cdp_tuple, site_path)        
   
             
 
