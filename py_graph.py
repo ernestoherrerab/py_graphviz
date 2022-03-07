@@ -2,7 +2,6 @@
 """
 Script to graph cdp neighborships.
 """
-from decouple import config
 from getpass import getpass
 from pathlib import Path
 from nornir import InitNornir
@@ -21,6 +20,7 @@ def main():
     ### PROGRAM VARIABLES ###
     username = input("Username: ")
     password = getpass(prompt="Password: ", stream=None)
+    tmp_dict_output = {}
     diagrams_path = Path("diagrams/")
     cdp_tuples_list = []
 
@@ -38,31 +38,43 @@ def main():
         print(f"Connection to device failed: {e}")
 
     print("Parsing generated output...")
+    ### CREATE SITE ID DICTIONARIES ###
     for result in results.keys():
-        cdp_tuple_list = []
-        neighbor_tuple = ()  
-        tmp_dict_output = dict(nr.inventory.hosts[result])
         host = str(nr.inventory.hosts[result])
-        for index in tmp_dict_output["facts"]["cdp"]["index"]:
-            tmp_neighbor = tmp_dict_output["facts"]["cdp"]["index"][index]["device_id"].split(".")
-            neighbor = tmp_neighbor[0]
-            neighbor_tuple = (host, neighbor)
-            cdp_tuple_list.append(neighbor_tuple)
-        cdp_tuples_list.append(cdp_tuple_list)
+        site_id = host.split("-")
+        site_id = site_id[0]
+        tmp_dict_output[site_id] = {}
 
-    
+    ### FILL HOST DATA IN DICTIONARIES ###
+    for result in results.keys():
+        host = str(nr.inventory.hosts[result])
+        site_id = host.split("-")
+        site_id = site_id[0]
+        tmp_dict_output[site_id][host] = {}
+        tmp_dict_output[site_id][host] = dict(nr.inventory.hosts[result])
+
+    ### CREATE TUPPLES LIST ###
+    for site in tmp_dict_output:
+        cdp_tuple_list = []  
+        for host in tmp_dict_output[site]:
+            neighbor_tuple = ()
+            for index in tmp_dict_output[site][host]["facts"]["cdp"]["index"]:
+                neighbor = tmp_dict_output[site][host]["facts"]["cdp"]["index"][index]["device_id"].split(".")
+                neighbor = neighbor[0]
+                neighbor_tuple = (host, neighbor)
+                cdp_tuple_list.append(neighbor_tuple)
+        cdp_tuples_list.append(cdp_tuple_list)
+        
     """    
     Generate Graph
     """
     print("Generating Diagrams...")
-    # Generate Graph Edges LLDP Neighbors
+    ### GENERATE GRAPH EDGES CDP NEIGHBORS ###
     for cdp_tuple in cdp_tuples_list:
         root = cdp_tuple[0][0].split("-")
         site_id = root[0]
         site_path = diagrams_path / f"{site_id}_site"
-        graph.gen_graph(f"{site_id}_site", cdp_tuple, site_path)        
-  
-            
+        graph.gen_graph(f"{site_id}_site", cdp_tuple, site_path)
 
 if __name__ == '__main__':
     main()
