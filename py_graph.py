@@ -5,8 +5,7 @@ Script to graph cdp neighborships.
 from getpass import getpass
 from pathlib import Path
 from nornir import InitNornir
-from nornir_scrapli.tasks import send_command, send_configs_from_file
-from nornir_utils.plugins.functions import print_result
+from nornir_scrapli.tasks import send_command
 import graph_builder as graph
 
 def get_data_task(task):
