@@ -12,7 +12,7 @@ def get_data_task(task):
     """
     Task to send commands to Devices via Nornir/Scrapli
     """
-    cdp_data = task.run(task=send_command, command="show cdp neighbors")
+    cdp_data = task.run(task=send_command, command="show cdp neighbors detail")
     task.host["facts"] = cdp_data.scrapli_response.genie_parse_output()
 
 def main():
@@ -57,8 +57,8 @@ def main():
         cdp_tuple_list = []  
         for host in tmp_dict_output[site]:
             neighbor_tuple = ()
-            for index in tmp_dict_output[site][host]["facts"]["cdp"]["index"]:
-                neighbor = tmp_dict_output[site][host]["facts"]["cdp"]["index"][index]["device_id"].split(".")
+            for index in tmp_dict_output[site][host]["facts"]["index"]:
+                neighbor = tmp_dict_output[site][host]["facts"]["index"][index]["device_id"].split(".")
                 neighbor = neighbor[0]
                 neighbor_tuple = (host, neighbor)
                 cdp_tuple_list.append(neighbor_tuple)
