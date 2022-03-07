@@ -2,18 +2,22 @@
 """
 Script to graph cdp neighborships.
 """
+
 from getpass import getpass
 from pathlib import Path
 from nornir import InitNornir
-from nornir_scrapli.tasks import send_command
+from nornir_scrapli.tasks import send_commands
 import graph_builder as graph
 
 def get_data_task(task):
     """
     Task to send commands to Devices via Nornir/Scrapli
     """
-    cdp_data = task.run(task=send_command, command="show cdp neighbors")
-    task.host["facts"] = cdp_data.scrapli_response.genie_parse_output()
+    commands =["show cdp neighbors detail"]
+    data_results = task.run(task=send_commands, commands=commands)
+    for data_result in data_results:
+        for data, command in zip(data_result.scrapli_response, commands):
+            task.host[command.replace(" ","_")] = data.genie_parse_output()
 
 def main():
     ### PROGRAM VARIABLES ###
@@ -51,14 +55,15 @@ def main():
         site_id = site_id[0]
         tmp_dict_output[site_id][host] = {}
         tmp_dict_output[site_id][host] = dict(nr.inventory.hosts[result])
+    
 
     ### CREATE TUPPLES LIST ###
     for site in tmp_dict_output:
         cdp_tuple_list = []  
         for host in tmp_dict_output[site]:
             neighbor_tuple = ()
-            for index in tmp_dict_output[site][host]["facts"]["cdp"]["index"]:
-                neighbor = tmp_dict_output[site][host]["facts"]["cdp"]["index"][index]["device_id"].split(".")
+            for index in tmp_dict_output[site][host]["show_cdp_neighbors_detail"]["index"]:
+                neighbor = tmp_dict_output[site][host]["show_cdp_neighbors_detail"]["index"][index]["device_id"].split(".")
                 neighbor = neighbor[0]
                 neighbor_tuple = (host, neighbor)
                 cdp_tuple_list.append(neighbor_tuple)
