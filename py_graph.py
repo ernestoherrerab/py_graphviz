@@ -57,8 +57,8 @@ def main():
     print("Generating Diagrams...")
     # Generate Graph Edges LLDP Neighbors
     for cdp_tuple in cdp_tuples_list:
-        root = cdp_tuple[0][0].split("-")
-        site_id = root[0]
+        site_id = cdp_tuple[0][0].split("-")
+        site_id = site_id[0]
         site_path = diagrams_path / f"{site_id}_site"
         graph.gen_graph(f"{site_id}_site", cdp_tuple, site_path)        
   
