@@ -31,14 +31,15 @@ def main():
     """
     Fetch sent command data, format results, and put them in a dictionary variable
     """
-    try:
-        print("Initializing connections to devices...")
-        nr = InitNornir(config_file="config/config.yml", core={"raise_on_error": True})
-        nr.inventory.defaults.username = username
-        nr.inventory.defaults.password = password
-        results = nr.run(task=get_data_task)
-    except KeyError as e:
-        print(f"Connection to device failed: {e}")
+    print("Initializing connections to devices...")
+    nr = InitNornir(config_file="config/config.yml", core={"raise_on_error": True})
+    nr.inventory.defaults.username = username
+    nr.inventory.defaults.password = password
+    results = nr.run(task=get_data_task)
+    hosts_failed = list(results.failed_hosts.keys())
+    if hosts_failed != []:
+        print(f"Authentication Failed: {list(results.failed_hosts.keys())}")
+
 
     print("Parsing generated output...")
     ### CREATE SITE ID DICTIONARIES ###
