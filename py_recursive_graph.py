@@ -21,8 +21,8 @@ def get_data_task(task):
         for data, command in zip(data_result.scrapli_response, commands):
             task.host[command.replace(" ","_")] = data.genie_parse_output()
 
-def neighbor_to_input(output_dict, input_dict):
-    """ Generate graph data from devices output """
+def rebuild_inventory(output_dict, input_dict):
+    """ Rebuild inventory file from CDP output on core switches """
     for index in input_dict["show_cdp_neighbors_detail"]["index"]:
         device_id = input_dict["show_cdp_neighbors_detail"]["index"][index]["device_id"].lower().replace(config('DOMAIN_NAME_1'), '').replace(config('DOMAIN_NAME_2'), '')
         if "management_addresses" != {}:
@@ -71,7 +71,7 @@ def main():
         site_id = site_id[0]
         tmp_dict_output[site_id] = {}    
 
-    ### FILL HOST DATA IN DICTIONARIES ###
+    ### REBUILD INVENTORY ###
     for result in results.keys():
         host = str(nr.inventory.hosts[result])
         site_id = host.split("-")
@@ -79,8 +79,7 @@ def main():
         tmp_dict_output[site_id][host] = {}
         tmp_dict_output[site_id][host] = dict(nr.inventory.hosts[result])
         if tmp_dict_output[site_id][host] != {}:
-            graph_input_dict = neighbor_to_input(hostfile_dict, tmp_dict_output[site_id][host])
-
+            graph_input_dict = rebuild_inventory(hostfile_dict, tmp_dict_output[site_id][host])
 
     ### UPDATE INVENTORY FILE WITH NEIGHBORS DATA 
     print("Updating Inventory Files")
