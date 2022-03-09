@@ -21,6 +21,25 @@ def get_data_task(task):
         for data, command in zip(data_result.scrapli_response, commands):
             task.host[command.replace(" ","_")] = data.genie_parse_output()
 
+def neighbor_to_input(output_dict, input_dict):
+    """ Generate graph data from devices output """
+    for index in input_dict["show_cdp_neighbors_detail"]["index"]:
+        device_id = input_dict["show_cdp_neighbors_detail"]["index"][index]["device_id"].lower().replace(config('DOMAIN_NAME_1'), '').replace(config('DOMAIN_NAME_2'), '')
+        if "management_addresses" != {}:
+            device_ip = list(input_dict["show_cdp_neighbors_detail"]["index"][index]["management_addresses"].keys())
+        if "entry_addresses" in input_dict["show_cdp_neighbors_detail"]["index"][index]:
+            device_ip = list(input_dict["show_cdp_neighbors_detail"]["index"][index]["entry_addresses"].keys())
+        if "interface_addresses" in input_dict["show_cdp_neighbors_detail"]["index"][index]:
+            device_ip = list(input_dict["show_cdp_neighbors_detail"]["index"][index]["interface_addresses"].keys())
+        device_ip = device_ip[0]
+        output_dict[device_id] = {}
+        output_dict[device_id]["hostname"] = device_ip
+        if "NX-OS" in input_dict["show_cdp_neighbors_detail"]["index"][index]["software_version"]:
+            output_dict[device_id]["groups"] = ["nxos_devices"]
+        else:
+            output_dict[device_id]["groups"] = ["ios_devices"]
+    return output_dict
+
 def main():
     ### PROGRAM VARIABLES ###
     username = input("Username: ")
@@ -59,33 +78,19 @@ def main():
         site_id = site_id[0]
         tmp_dict_output[site_id][host] = {}
         tmp_dict_output[site_id][host] = dict(nr.inventory.hosts[result])
-        for index in tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"]:
-            device_id = tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]["device_id"].lower().replace(config('DOMAIN_NAME_1'), '').replace(config('DOMAIN_NAME_2'), '')
-            if "management_addresses" != {}:
-                device_ip = list(tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]["management_addresses"].keys())
-            if "entry_addresses" in tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]:
-                device_ip = list(tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]["entry_addresses"].keys())
-            if "interface_addresses" in tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]:
-                device_ip = list(tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]["interface_addresses"].keys())
-            device_ip = device_ip[0]
-            hostfile_dict[device_id] = {}
-            hostfile_dict[device_id]["hostname"] = device_ip
-            if "NX-OS" in tmp_dict_output[site_id][host]["show_cdp_neighbors_detail"]["index"][index]["software_version"]:
-                hostfile_dict[device_id]["groups"] = ["nxos_devices"]
-            else:
-                hostfile_dict[device_id]["groups"] = ["ios_devices"]
+        if tmp_dict_output[site_id][host] != {}:
+            graph_input_dict = neighbor_to_input(hostfile_dict, tmp_dict_output[site_id][host])
+
 
     ### UPDATE INVENTORY FILE WITH NEIGHBORS DATA 
     print("Updating Inventory Files")
-    for key, _ in hostfile_dict.copy().items():
-        ip_address = ipaddress.IPv4Address(hostfile_dict[key]["hostname"])
+    for key, _ in graph_input_dict.copy().items():
+        ip_address = ipaddress.IPv4Address(graph_input_dict[key]["hostname"])
         if ip_address.is_global:
-            hostfile_dict.pop(key, None)
-    host_yaml = dump(hostfile_dict, default_flow_style=False)
+            graph_input_dict.pop(key, None)
+    host_yaml = dump(graph_input_dict, default_flow_style=False)
     with open(inv_path_file, "a") as open_file:
         open_file.write("\n" + host_yaml)
-    
-    
 
     print("Initializing connections to new devices...")
     nr = InitNornir(config_file="config/config.yml")
