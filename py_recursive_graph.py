@@ -117,7 +117,9 @@ def main():
                 for index in tmp_dict_output[site][host]["show_cdp_neighbors_detail"]["index"]:
                     neighbor = tmp_dict_output[site][host]["show_cdp_neighbors_detail"]["index"][index]["device_id"].split(".")
                     neighbor = neighbor[0]
-                    neighbor_tuple = (host, neighbor)
+                    hostname = host.split("(")
+                    hostname = hostname[0]
+                    neighbor_tuple = (hostname, neighbor)
                     cdp_tuple_list.append(neighbor_tuple)
         cdp_tuples_list.append(cdp_tuple_list)
        
