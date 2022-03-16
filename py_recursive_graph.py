@@ -11,6 +11,7 @@ from nornir_scrapli.tasks import send_commands
 from yaml import dump,load, SafeDumper
 from yaml.loader import FullLoader
 import graph_builder as graph
+from tqdm import tqdm
 
 
 class NoAliasDumper(SafeDumper):
@@ -32,18 +33,21 @@ def init_nornir(username, password):
     nr = InitNornir(config_file="config/config.yml")
     nr.inventory.defaults.username = username
     nr.inventory.defaults.password = password
-    results = nr.run(task=get_data_task)
+    with tqdm(total=len(nr.inventory.hosts)) as progress_bar:
+        results = nr.run(task=get_data_task, progress_bar=progress_bar)
     hosts_failed = list(results.failed_hosts.keys())
     if hosts_failed != []:
         print(f"Authentication Failed: {list(results.failed_hosts.keys())}")
+        print(f"{len(list(results.failed_hosts.keys()))}/{len(nr.inventory.hosts)} devices failed authentication...")
     return nr, results
 
-def get_data_task(task):
+def get_data_task(task, progress_bar):
     """
     Task to send commands to Devices via Nornir/Scrapli
     """
     commands =["show cdp neighbors detail"]
     data_results = task.run(task=send_commands, commands=commands)
+    progress_bar.update()
     for data_result in data_results:
         for data, command in zip(data_result.scrapli_response, commands):
             task.host[command.replace(" ","_")] = data.genie_parse_output()
