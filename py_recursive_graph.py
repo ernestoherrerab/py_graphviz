@@ -38,6 +38,7 @@ def init_nornir(username, password):
     hosts_failed = list(results.failed_hosts.keys())
     if hosts_failed != []:
         print(f"Authentication Failed: {list(results.failed_hosts.keys())}")
+        print(f"{len(list(results.failed_hosts.keys()))}/{len(nr.inventory.hosts)} devices failed authentication...")
     return nr, results
 
 def get_data_task(task, progress_bar):
